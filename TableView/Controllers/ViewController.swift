@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITableViewDataSource {
+class ViewController: UIViewController{
     
     
     var moviesArray: [Movie] = []
@@ -23,22 +23,27 @@ class ViewController: UIViewController, UITableViewDataSource {
         tableView.dataSource = self
         tableView.rowHeight = 120
         
+        tableView.delegate = self
+        
         movieDataManager.makeMovieData()
-        moviesArray = movieDataManager.getMovieData()
         
     }
+    
+}
 
-
+extension ViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return moviesArray.count
+        return movieDataManager.getMovieData().count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell", for: indexPath) as! MovieCell
         
-        let movie = moviesArray[indexPath.row]
+        let array = movieDataManager.getMovieData()
+        
+        let movie = array[indexPath.row]
         
         cell.mainImageView.image = movie.movieImage
         cell.MovieNameLabel.text = movie.movieName
@@ -49,6 +54,21 @@ class ViewController: UIViewController, UITableViewDataSource {
         return cell
     }
     
-    
 }
 
+extension ViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: "toDetail", sender: indexPath)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toDetail" {
+            let detailVC = segue.destination as! DetailViewController
+            
+            let arr = movieDataManager.getMovieData()
+            
+            let indexPath = sender as! IndexPath
+            detailVC.movieData = arr[indexPath.row]
+        }
+    }
+}
